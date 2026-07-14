@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GyaanGlow India - Student Quest Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Poppins:wght@500;700;800&display=swap');
+
+        :root {
+            --primary: #58cc02;
+            --primary-dark: #46a302;
+            --secondary: #1cb0f6;
+            --secondary-dark: #1899d6;
+            --bg-canvas: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #2b3a4a;
+            --text-muted: #7f92a5;
+            --accent-orange: #ff9600;
+            --accent-red: #ff4b4b;
+            --accent-yellow: #ffc800;
+            --border-color: #e5ecf4;
+        }
+
+        body { 
+            font-family: "Nunito", "Poppins", sans-serif; 
+            background: linear-gradient(135deg, #eef5fc 0%, #f0f4f8 100%);
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 95vh; 
+        }
+
+        /* Premium Zearn-Style Learning Container */
+        .zearn-container { 
+            width: 100%; 
+            max-width: 700px; 
+            background: var(--card-bg);
+            padding: 40px 30px; 
+            border-radius: 28px;
+            border: 4px solid var(--border-color);
+            box-shadow: 0 16px 32px rgba(28, 48, 74, 0.08);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        /* Dual-Language Subtitles */
+        .hindi-sub {
+            display: block;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+        
+        /* Premium Top Status Bar (Duolingo Style) */
+        .top-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 35px; 
+            background: #f8fafc;
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: 2px solid var(--border-color);
+        }
+        .progress-container { 
+            flex-grow: 1; 
+            background-color: #e2e8f0; 
+            height: 16px; 
+            border-radius: 20px; 
+            margin: 0 15px; 
+            overflow: hidden; 
+            position: relative;
+        }
+        .progress-bar { 
+            width: 0%; 
+            height: 100%; 
+            background: linear-gradient(90deg, #58cc02, #76e11b);
+            border-radius: 20px; 
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .stat { font-weight: 900; font-size: 18px; display: flex; align-items: center; gap: 6px; }
+        .streak { color: var(--accent-orange); } 
+        .hearts { color: var(--accent-red); } 
+        .xp { color: var(--accent-yellow); }
+        
+        h1 { 
+            font-family: "Poppins", sans-serif;
+            color: var(--primary); 
+            font-size: 42px; 
+            margin: 0 0 10px 0; 
+            font-weight: 800; 
+            letter-spacing: -1px; 
+        }
+
+        /* Question Panel (IXL Vibe) */
+        .question-box {
+            background-color: #fcfdfe;
+            border: 3px solid var(--border-color);
+            border-radius: 22px;
+            padding: 28px;
+            margin-bottom: 30px;
+            text-align: left;
+            position: relative;
+        }
+        h2 { font-size: 24px; color: var(--text-main); margin: 0; font-weight: 800; line-height: 1.4; }
+        
+        input { 
+            width: 100%; 
+            padding: 18px; 
+            border: 3px solid var(--border-color); 
+            background: #f8fafc; 
+            border-radius: 18px; 
+            font-size: 18px; 
+            box-sizing: border-box; 
+            margin-bottom: 25px; 
+            font-weight: bold;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s;
+        }
+        input:focus { 
+            border-color: var(--secondary); 
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(28, 176, 246, 0.15);
+        }
+
+        /* Beautiful 3D Interactive Buttons */
+        .btn-3d { 
+            width: 100%; 
+            padding: 18px; 
+            background-color: var(--primary); 
+            color: white; 
+            border: none; 
+            border-radius: 20px; 
+            font-size: 20px; 
+            font-weight: 900; 
+            cursor: pointer; 
+            box-shadow: 0 6px 0 var(--primary-dark); 
+            transition: all 0.1s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        .btn-3d:active { 
+            transform: translateY(4px); 
+            box-shadow: 0 2px 0 var(--primary-dark); 
+        }
+        
+        /* Grid of Learning Topics */
+        .topics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 500px) {
+            .topics-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Option Card Styles */
+        .option-card { 
+            background: white; 
+            border: 3px solid var(--border-color); 
+            border-bottom: 6px solid var(--border-color); 
+            border-radius: 20px; 
+            padding: 20px; 
+            text-align: left; 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            cursor: pointer; 
+            transition: all 0.15s ease; 
+            display: flex;
+            flex-direction: column;
+        }
+        .option-card:hover { 
+            background-color: #f8fafc; 
+            border-color: #cbd5e1; 
+        }
+        .option-card:active { 
+            transform: translateY(3px); 
+            border-bottom-width: 3px; 
+        }
+        
+        .back-btn { 
+            background-color: var(--secondary); 
+            box-shadow: 0 6px 0 var(--secondary-dark); 
+            margin-top: 20px; 
+        }
+        .back-btn:active { 
+            box-shadow: 0 2px 0 var(--secondary-dark); 
+        }
+        
+        .logout-link { 
+            display: inline-block; 
+            margin-top: 30px; 
+            color: var(--text-muted); 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-size: 15px; 
+            transition: color 0.2s;
+        }
+        .logout-link:hover { color: var(--text-main); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="zearn-container">
+    <div id="loginSection">
+        <h1>GyaanGlow Student Portal 🎯</h1>
+        <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 30px; font-weight: 700;">
+            The smart way to master real-world skills!
+            <span class="hindi-sub">कौशल हासिल करने का सबसे आसान और मजेदार तरीका!</span>
+        </p>
+        <input type="text" id="usernameInput" placeholder="Enter Your Student Username / छात्र का नाम">
+        <button class="btn-3d" onclick="login()">
+            Get Started 
+            <span style="display:block; font-size:12px; font-weight:700;">शुरू करें</span>
+        </button>
+    </div>
+
+    <div id="portalSection" class="hidden">
+        <div class="top-bar">
+            <span class="stat xp" title="Your Total Points">✨ <span id="xpCount">0</span></span>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <span class="stat streak" title="Day Streak">🔥 <span id="streakCount">1</span></span>
+            <span class="stat hearts" title="Lives Remaining">❤️ <span id="heartsCount">5</span></span>
+        </div>
+        
+        <div id="subjectMenu">
+            <h2 style="margin-bottom: 25px; text-align: left;">
+                Choose Your Next Mission:
+                <span class="hindi-sub">अपनी अगली सीख चुनें:</span>
+            </h2>
+            <div class="topics-grid">
+                <div class="option-card" onclick="startSubject('math')">
+                    <span style="font-size: 26px; margin-bottom: 8px;">🔢</span>
+                    <strong>Mathematics</strong>
+                    <span class="hindi-sub">गणित: बीजगणित और अंकगणित</span>
+                </div>
+                <div class="option-card" onclick="startSubject('science')">
+                    <span style="font-size: 26px; margin-bottom: 8px;">⚛️</span>
+                    <strong>Science Quest</strong>
+                    <span class="hindi-sub">विज्ञान: परमाणु और ब्रह्मांड</span>
+                </div>
+                <div class="option-card" onclick="startSubject('english')">
+                    <span style="font-size: 26px; margin-bottom: 8px;">✍️</span>
+                    <strong>English Literature</strong>
+                    <span class="hindi-sub">अंग्रेजी: व्याकरण कला</span>
+                </div>
+                <div class="option-card" onclick="startSubject('social')">
+                    <span style="font-size: 26px; margin-bottom: 8px;">🗺️</span>
+                    <strong>Social Studies</strong>
+                    <span class="hindi-sub">सामाजिक अध्ययन: इतिहास और भूगोल</span>
+                </div>
+            </div>
+            <a href="#" class="logout-link" onclick="logout()">Sign Out / लॉग आउट करें</a>
+        </div>
+
+        <div id="quizContainer" class="hidden">
+            <div class="question-box">
+                <h2 id="questionText">Loading mission...</h2>
+                <span class="hindi-sub" id="questionHindiText">सवालों को लोड किया जा रहा है...</span>
+            </div>
+            <div id="optionsContainer"></div>
+            <button class="btn-3d back-btn" onclick="showMenu()">
+                Quit Quest
+                <span style="display:block; font-size:11px; font-weight:700;">पाठ से बाहर निकलें</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = "https://ydhdwvjcspssorlytsor.supabase.co"; 
+    const SUPABASE_ANON_KEY = "sb_publishable_ToqtHsK2IkxrKfbhgzV5zg_WCryyVOA";
+    
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // DEEP CURRICULUM WITH MULTI-QUESTION QUESTS
+    const quests = {
+        math: [
+            { 
+                question: "If 3x + 5 = 20, find the value of x.", 
+                hindi: "यदि 3x + 5 = 20 है, तो x का मान ज्ञात कीजिए।",
+                options: ["x = 3", "x = 5", "x = 15"], 
+                correctIndex: 1 
+            },
+            { 
+                question: "What is the square root of 144?", 
+                hindi: "144 का वर्गमूल (Square Root) क्या है?",
+                options: ["12", "14", "16"], 
+                correctIndex: 0 
+            },
+            { 
+                question: "Solve: (15 / 3) + 4 * 2", 
+                hindi: "सरल करें: (15 / 3) + 4 * 2",
+                options: ["18", "13", "26"], 
+                correctIndex: 1 
+            }
+        ],
+        science: [
+            { 
+                question: "Which subatomic particle has a neutral (no) charge?", 
+                hindi: "किस परमाणु कण पर कोई चार्ज (उदासीन) नहीं होता है?",
+                options: ["Proton (प्रोटॉन)", "Electron (इलेक्ट्रॉन)", "Neutron (न्यूट्रॉन)"], 
+                correctIndex: 2 
+            },
+            { 
+                question: "What state of matter has a definite volume but no definite shape?", 
+                hindi: "पदार्थ की किस अवस्था का आयतन निश्चित होता है लेकिन आकार नहीं?",
+                options: ["Solid (ठोस)", "Liquid (तरल)", "Gas (गैस)"], 
+                correctIndex: 1 
+            },
+            { 
+                question: "What gas is primarily released during plant photosynthesis?", 
+                hindi: "पौध पौधे प्रकाश संश्लेषण (Photosynthesis) के दौरान कौन सी गैस छोड़ते हैं?",
+                options: ["Carbon Dioxide (कार्बन डाइऑक्साइड)", "Oxygen (ऑक्सीजन)", "Nitrogen (नाइट्रोजन)"], 
+                correctIndex: 1 
+            }
+        ],
+        english: [
+            { 
+                question: "Choose the conjunction in this sentence: 'I went home because it was late.'", 
+                hindi: "संयोजक (Conjunction) शब्द को चुनें: 'I went home because it was late.'",
+                options: ["went", "because", "late"], 
+                correctIndex: 1 
+            },
+            { 
+                question: "Identify the antonym of the word 'ANCIENT'.", 
+                hindi: "'ANCIENT' (प्राचीन) का विलोम शब्द चुनें।",
+                options: ["Modern (आधुनिक)", "Historic (ऐतिहासिक)", "Old (पुराना)"], 
+                correctIndex: 0 
+            },
+            { 
+                question: "Complete the proverb: 'A picture is worth a thousand _______.'", 
+                hindi: "कहावत को पूरा करें: 'A picture is worth a thousand _______.'",
+                options: ["words", "books", "colors"], 
+                correctIndex: 0 
+            }
+        ],
+        social: [
+            { 
+                question: "Which imaginary line divides the Earth into Northern and Southern hemispheres?", 
+                hindi: "कौन सी काल्पनिक रेखा पृथ्वी को उत्तरी और दक्षिणी गोलार्ध में विभाजित करती है?",
+                options: ["Prime Meridian (प्राइम मेरिडियन)", "Equator (भूमध्य रेखा)", "Tropic of Cancer (कर्क रेखा)"], 
+                correctIndex: 1 
+            },
+            { 
+                question: "Which of the following civilizations is famous for pyramids?", 
+                hindi: "निम्नलिखित में से कौन सी सभ्यता पिरामिडों के लिए प्रसिद्ध है?",
+                options: ["Mesopotamian", "Indus Valley", "Egyptian (मिस्र की सभ्यता)"], 
+                correctIndex: 2 
+            }
+        ]
+    };
+
+    let activeSubject = '';
+    let currentQuestionIndex = 0;
+    let currentUser = '';
+
+    async function login() {
+        const username = document.getElementById('usernameInput').value.trim();
+        if (!username) return alert("Please enter a username! / कृपया अपना नाम दर्ज करें!");
+        currentUser = username;
+
+        try {
+            let { data, error } = await db.from('students').select('*').eq('username', username);
+
+            if (error) {
+                return alert("Database Error:\n" + error.message);
+            }
+
+            if (!data || data.length === 0) {
+                const { error: insertError } = await db.from('students').insert([
+                    { username: username, xp: 0, streak: 1, hearts: 5, last_lesson: 'Account Created' }
+                ]);
+                
+                if (insertError) {
+                    return alert("Insert Error:\n" + insertError.message);
+                }
+            }
+
+            showPortal();
+        } catch (err) {
+            alert("Crash Exception:\n" + err.message);
+        }
+    }
+
+    async function showPortal() {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('portalSection').classList.remove('hidden');
+        showMenu();
+    }
+
+    async function showMenu() {
+        document.getElementById('subjectMenu').classList.remove('hidden');
+        document.getElementById('quizContainer').classList.add('hidden');
+        document.getElementById('progressBar').style.width = '0%';
+        await pullCloudStats();
+    }
+
+    async function pullCloudStats() {
+        try {
+            let { data } = await db.from('students').select('*').eq('username', currentUser).single();
+            if (data) {
+                document.getElementById('xpCount').innerText = data.xp;
+                document.getElementById('streakCount').innerText = data.streak;
+                document.getElementById('heartsCount').innerText = data.hearts;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    function startSubject(subjectKey) {
+        activeSubject = subjectKey;
+        currentQuestionIndex = 0;
+        document.getElementById('subjectMenu').classList.add('hidden');
+        document.getElementById('quizContainer').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const activeQuestions = quests[activeSubject];
+
+        if (currentQuestionIndex >= activeQuestions.length) {
+            finishQuest();
+            return;
+        }
+
+        let progressPercent = (currentQuestionIndex / activeQuestions.length) * 100;
+        document.getElementById('progressBar').style.width = progressPercent + '%';
+
+        const currentData = activeQuestions[currentQuestionIndex];
+        document.getElementById('questionText').innerText = currentData.question;
+        document.getElementById('questionHindiText').innerText = currentData.hindi;
+        
+        const optionsDiv = document.getElementById('optionsContainer');
+        optionsDiv.innerHTML = ''; 
+
+        currentData.options.forEach((option, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-card';
+            btn.innerText = option;
+            btn.onclick = function() { checkAnswer(index); };
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    async function checkAnswer(selectedIndex) {
+        try {
+            let { data } = await db.from('students').select('*').eq('username', currentUser).single();
+            const currentData = quests[activeSubject][currentQuestionIndex];
+
+            if (selectedIndex === currentData.correctIndex) {
+                alert("🎯 Correct! / सही उत्तर!");
+                currentQuestionIndex++; 
+            } else {
+                let currentHearts = data.hearts;
+                if (currentHearts > 1) {
+                    await db.from('students').update({ hearts: currentHearts - 1 }).eq('username', currentUser);
+                    alert("❌ Incorrect! Lost a heart / गलत जवाब! आपने एक दिल ❤️ खो दिया।");
+                } else {
+                    await db.from('students').update({ hearts: 5 }).eq('username', currentUser);
+                    alert("💔 Out of hearts! Health reset. Restarting Course / सारे दिल ख़त्म हो गए! फिर से शुरू करें।");
+                    currentQuestionIndex = 0;
+                }
+            }
+            loadQuestion();
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    async function finishQuest() {
+        try {
+            let { data } = await db.from('students').select('*').eq('username', currentUser).single();
+            
+            await db.from('students').update({
+                xp: data.xp + 50,
+                streak: data.streak + 1,
+                last_lesson: `Completed ${activeSubject} Module`
+            }).eq('username', currentUser);
+
+            alert(`👑 QUEST COMPLETE! +50 XP\nमिशन पूरा हुआ! +50 XP प्राप्त हुआ!`);
+            showMenu();
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    function logout() {
+        currentUser = '';
+        document.getElementById('loginSection').classList.remove('hidden');
+        document.getElementById('portalSection').classList.add('hidden');
+        document.getElementById('usernameInput').value = '';
+    }
+</script>
+</body>
+</html>
